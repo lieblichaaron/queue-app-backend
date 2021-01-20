@@ -6,7 +6,7 @@ module.exports = {
       process.env.MDB_URL,
       { useUnifiedTopology: true, useNewUrlParser: true },
       function (err, client) {
-        db = client.db("PetAdopt");
+        db = client.db("Queue");
         return callback(err);
       }
     );
