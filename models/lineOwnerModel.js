@@ -47,7 +47,7 @@ module.exports = class LineOwner {
     let updateDoc = {
       $set: {},
     };
-    if (accountSettings.email) {
+    if (accountSettings.email && accountSettings.email !== oldEmail) {
       const existingUser = await this.getLineOwnerByEmail(
         accountSettings.email
       );
