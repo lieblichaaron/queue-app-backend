@@ -25,4 +25,14 @@ module.exports = class Line {
       return false;
     }
   };
+
+  getLinesByOwnerId = async (ownerId) => {
+    try {
+      const cursor = await this.linesCollection.find({ownerId});
+      const lines = await cursor.toArray()
+      return lines;
+    } catch (err) {
+      return err.stack;
+    }
+  }
 };
