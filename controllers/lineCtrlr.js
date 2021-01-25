@@ -15,9 +15,9 @@ const getLineById = async (req, res) => {
 
 const getLinesByOwnerId = async (req, res) => {
   const ownerId = req.params.id;
-  const lines = await getLinesByOwnerId(ownerId);
-  res.json(lines)
-}
+  const lines = await lineInstance.getLinesByOwnerId(ownerId);
+  res.json(lines);
+};
 
 module.exports = {
   addNewLine,

@@ -26,13 +26,24 @@ const loginLineOwner = async (req, res) => {
 
 const getLoggedInUser = async (req,res) => {
   const email = req.headers.email;
-  console.log(email)
   const user = await new LineOwner().getLineOwnerByEmail(email);
   res.json(user);
+}
+
+const editOwnerDetails = async (req, res) => {
+  const email = req.headers.email;
+  try {
+    await new LineOwner().changeLineOwnerSettings(req.body, email);
+  } catch (err) {
+    console.log(err)
+    res.sendStatus(400)
+  }
+  res.sendStatus(200);
 }
 
 module.exports = {
   addNewLineOwner,
   loginLineOwner,
   getLoggedInUser,
+  editOwnerDetails,
 };
