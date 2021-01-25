@@ -6,6 +6,7 @@ const {
   getLineById,
   getLinesByOwnerId,
   addShopperToLine,
+  removeShopperFromLine,
 } = require("../controllers/lineCtrlr");
 const {} = require("../controllers/validator");
 
@@ -15,6 +16,8 @@ router.get("/:id", getLineById);
 
 router.get("/owned-by/:id", getLinesByOwnerId);
 
-router.put("/:id", addShopperToLine);
+router.put("/add-shopper/:id", addShopperToLine);
+
+router.put("/remove-shopper/:id", removeShopperFromLine);
 
 module.exports = router;

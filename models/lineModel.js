@@ -48,4 +48,17 @@ module.exports = class Line {
       return false;
     }
   };
+
+  removeShopperFromLine = async (id, shopper) => {
+    try {
+      const line = await this.linesCollection.findOneAndUpdate(
+        { _id: ObjectID(id) },
+        { $pull: { line: shopper } },
+        { returnOriginal: false }
+      );
+      return line;
+    } catch {
+      return false;
+    }
+  };
 };
