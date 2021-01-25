@@ -19,8 +19,23 @@ const getLinesByOwnerId = async (req, res) => {
   res.json(lines);
 };
 
+const addShopperToLine = async (req, res) => {
+  const { id } = req.params;
+  const shopper = req.body;
+  const line = await lineInstance.addShopperToLine(id, shopper);
+  res.json(line.value);
+};
+
+const removeShopperFromLine = async (req, res) => {
+  const { id } = req.params;
+  const shopper = req.body;
+  await lineInstance.removeShopperFromLine(id, shopper);
+  res.json("You have left the line");
+};
 module.exports = {
   addNewLine,
   getLineById,
   getLinesByOwnerId,
+  addShopperToLine,
+  removeShopperFromLine,
 };

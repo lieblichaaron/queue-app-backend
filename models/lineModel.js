@@ -28,11 +28,37 @@ module.exports = class Line {
 
   getLinesByOwnerId = async (ownerId) => {
     try {
-      const cursor = await this.linesCollection.find({ownerId});
-      const lines = await cursor.toArray()
+      const cursor = await this.linesCollection.find({ ownerId });
+      const lines = await cursor.toArray();
       return lines;
     } catch (err) {
       return err.stack;
     }
-  }
+  };
+
+  addShopperToLine = async (id, shopper) => {
+    try {
+      const line = await this.linesCollection.findOneAndUpdate(
+        { _id: ObjectID(id) },
+        { $push: { line: shopper } },
+        { returnOriginal: false }
+      );
+      return line;
+    } catch {
+      return false;
+    }
+  };
+
+  removeShopperFromLine = async (id, shopper) => {
+    try {
+      const line = await this.linesCollection.findOneAndUpdate(
+        { _id: ObjectID(id) },
+        { $pull: { line: shopper } },
+        { returnOriginal: false }
+      );
+      return line;
+    } catch {
+      return false;
+    }
+  };
 };
