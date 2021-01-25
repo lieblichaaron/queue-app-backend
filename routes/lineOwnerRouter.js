@@ -9,6 +9,6 @@ const {
 const {} = require("../controllers/validator");
 
 router.post("/", addNewLineOwner);
-router.post("/", loginLineOwner);
+router.post("/login", loginLineOwner);
 
 module.exports = router;
