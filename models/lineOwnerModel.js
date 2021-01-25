@@ -35,15 +35,15 @@ module.exports = class LineOwner {
       return err.stack;
     }
   };
-  changeLineOwnerSettings = async (accountSettings) => {
+  changeLineOwnerSettings = async (accountSettings, oldEmail) => {
     /**
      * @param {Object} accountSettings - Changes to user settings
-     * @param {string} accountSettings.id - User id
      * @param {string} [accountSettings.email] - User's new email address
      * @param {string} [accountSettings.displayName] - User's new display name
+     * @param {string} oldEmail - User's current email address
      */
 
-    const filter = { _id: ObjectID(id) };
+    const filter = { email: oldEmail };
     let updateDoc = {
       $set: {},
     };
