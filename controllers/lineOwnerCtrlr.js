@@ -36,8 +36,12 @@ const loginLineOwner = async (req, res) => {
     lineOwner.password,
     async (err, result) => {
       if (result) {
-        console.log(result);
-        res.json(lineOwner);
+        res.status(200).json(lineOwner);
+      } else {
+        res.status(400).json({
+          success: false,
+          error: "Wrong password",
+        });
       }
     }
   );
@@ -54,8 +58,8 @@ const editOwnerDetails = async (req, res) => {
   try {
     await new LineOwner().changeLineOwnerSettings(req.body, email);
   } catch (err) {
-    if (err.message === "Email address is taken" )
-    res.status(400).send("email address already exists")
+    if (err.message === "Email address is taken")
+      res.status(400).send("email address already exists");
     return;
   }
   res.sendStatus(200);
