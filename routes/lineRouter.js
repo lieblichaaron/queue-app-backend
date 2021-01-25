@@ -8,6 +8,7 @@ const {
   addShopperToLine,
   removeShopperFromLine,
 } = require("../controllers/lineCtrlr");
+
 const {} = require("../controllers/validator");
 
 router.post("", addNewLine);

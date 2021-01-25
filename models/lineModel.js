@@ -10,6 +10,7 @@ module.exports = class Line {
       const newLineCursor = await this.linesCollection.insertOne(lineData);
       const newLine = newLineCursor.ops[0];
       return newLine._id;
+<<<<<<< HEAD
     } catch (err) {
       return false;
     }
@@ -31,11 +32,24 @@ module.exports = class Line {
       const cursor = await this.linesCollection.find({ ownerId });
       const lines = await cursor.toArray();
       return lines;
+
     } catch (err) {
-      return err.stack;
+      return false;
     }
   };
 
+  getLineById = async (id) => {
+    try {
+      const line = await this.linesCollection.findOne({
+        _id: ObjectID(id),
+      });
+      return line;
+    } catch {
+      return false;
+    }
+  };
+
+<<<<<<< HEAD
   addShopperToLine = async (id, shopper) => {
     try {
       const line = await this.linesCollection.findOneAndUpdate(
@@ -61,4 +75,15 @@ module.exports = class Line {
       return false;
     }
   };
+=======
+  getLinesByOwnerId = async (ownerId) => {
+    try {
+      const cursor = await this.linesCollection.find({ownerId});
+      const lines = await cursor.toArray()
+      return lines;
+    } catch (err) {
+      return err.stack;
+    }
+  }
+>>>>>>> e786cb242e78a63a7390d06cd9d1aa797080bbae
 };
