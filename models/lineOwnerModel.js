@@ -1,5 +1,6 @@
 const mongoUtil = require("../utils/dbConnection");
 const { ObjectID } = require("mongodb");
+const validate = require("../controllers/validator");
 
 module.exports = class LineOwner {
   constructor() {
@@ -34,15 +35,15 @@ module.exports = class LineOwner {
       return err.stack;
     }
   };
-  changeLineOwnerSettings = async (accountSettings) => {
+  changeLineOwnerSettings = async (accountSettings, oldEmail) => {
     /**
      * @param {Object} accountSettings - Changes to user settings
-     * @param {string} accountSettings.id - User id
      * @param {string} [accountSettings.email] - User's new email address
      * @param {string} [accountSettings.displayName] - User's new display name
+     * @param {string} oldEmail - User's current email address
      */
 
-    const filter = { _id: ObjectID(id) };
+    const filter = { email: oldEmail };
     let updateDoc = {
       $set: {},
     };
@@ -71,11 +72,19 @@ module.exports = class LineOwner {
      */
 
     const filter = { _id: ObjectID(updateObject.id) };
-    // verify old password
-    // hash password
-    let hashedPassword;
-    //
-
+    const projection = { password: 1 };
+    try {
+      const user = await this.lineOwnersCollection.findOne(filter);
+    } catch (err) {
+      return err.stack;
+    }
+    const isCorrectPassword = await validate.comparePasswordHash(
+      updateObject.oldPassword,
+      user.password
+    );
+    if (!isCorrectPassword) {
+      return validate.InvalidPasswordError("incorrect password");
+    }
     const updateDoc = {
       $set: {
         password: hashedPassword,

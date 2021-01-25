@@ -1,4 +1,5 @@
 const mongoUtil = require("../utils/dbConnection");
+const { ObjectID } = require("mongodb");
 
 module.exports = class Line {
   constructor() {
@@ -8,9 +9,56 @@ module.exports = class Line {
     try {
       const newLineCursor = await this.linesCollection.insertOne(lineData);
       const newLine = newLineCursor.ops[0];
-      return newLine;
+      return newLine._id;
+    } catch (err) {
+      return false;
+    }
+  };
+
+  getLineById = async (id) => {
+    try {
+      const line = await this.linesCollection.findOne({
+        _id: ObjectID(id),
+      });
+      return line;
+    } catch {
+      return false;
+    }
+  };
+
+  getLinesByOwnerId = async (ownerId) => {
+    try {
+      const cursor = await this.linesCollection.find({ ownerId });
+      const lines = await cursor.toArray();
+      return lines;
     } catch (err) {
       return err.stack;
+    }
+  };
+
+  addShopperToLine = async (id, shopper) => {
+    try {
+      const line = await this.linesCollection.findOneAndUpdate(
+        { _id: ObjectID(id) },
+        { $push: { line: shopper } },
+        { returnOriginal: false }
+      );
+      return line;
+    } catch {
+      return false;
+    }
+  };
+
+  removeShopperFromLine = async (id, shopper) => {
+    try {
+      const line = await this.linesCollection.findOneAndUpdate(
+        { _id: ObjectID(id) },
+        { $pull: { line: shopper } },
+        { returnOriginal: false }
+      );
+      return line;
+    } catch {
+      return false;
     }
   };
 };

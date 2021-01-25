@@ -43,7 +43,27 @@ const loginLineOwner = async (req, res) => {
   );
 };
 
+const getLoggedInUser = async (req,res) => {
+  const email = req.headers.email;
+  const user = await new LineOwner().getLineOwnerByEmail(email);
+  res.json(user);
+}
+
+const editOwnerDetails = async (req, res) => {
+  const email = req.headers.email;
+  try {
+    await new LineOwner().changeLineOwnerSettings(req.body, email);
+  } catch (err) {
+    if (err.message === "Email address is taken" )
+    res.status(400).send("email address already exists")
+    return;
+  }
+  res.sendStatus(200);
+}
+
 module.exports = {
   addNewLineOwner,
   loginLineOwner,
+  getLoggedInUser,
+  editOwnerDetails,
 };
