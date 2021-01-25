@@ -10,7 +10,6 @@ module.exports = class Line {
       const newLineCursor = await this.linesCollection.insertOne(lineData);
       const newLine = newLineCursor.ops[0];
       return newLine._id;
-
     } catch (err) {
       return false;
     }
@@ -33,7 +32,6 @@ module.exports = class Line {
       const lines = await cursor.toArray();
 
       return lines;
-
     } catch (err) {
       return false;
     }
@@ -78,8 +76,8 @@ module.exports = class Line {
 
   getLinesByOwnerId = async (ownerId) => {
     try {
-      const cursor = await this.linesCollection.find({ownerId});
-      const lines = await cursor.toArray()
+      const cursor = await this.linesCollection.find({ ownerId });
+      const lines = await cursor.toArray();
       return lines;
     } catch (err) {
       return err.stack;
@@ -111,3 +109,4 @@ module.exports = class Line {
       return false;
     }
   };
+};
