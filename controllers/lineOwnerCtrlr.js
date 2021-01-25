@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 
 const LineOwner = require("../models/lineOwnerModel");
+const lineOwnerInstance = new LineOwner();
 
 const addNewLineOwner = async (req, res) => {
   let newOwner = await req.body;
@@ -12,23 +13,41 @@ const addNewLineOwner = async (req, res) => {
     });
   }
 
-  // Call lineOwnerModel method to check if email already exists
-
-  const lineOwnerInstance = new LineOwner(newOwner);
   newOwner.password = await bcrypt.hash(newOwner.password, 10);
   await lineOwnerInstance.addLineOwner(newOwner);
-  res.json(newOwner);
+  res.status(200).json(newOwner);
 };
 
 const loginLineOwner = async (req, res) => {
-  res.json();
+  let body = await req.body;
+
+  if (!body) {
+    return res.status(400).json({
+      success: false,
+      error: "No email provided",
+    });
+  }
+
+  const lineOwner = await lineOwnerInstance.getLineOwnerByEmail(body.email);
+  console.log(lineOwner);
+
+  await bcrypt.compare(
+    body.password,
+    lineOwner.password,
+    async (err, result) => {
+      if (result) {
+        console.log(result);
+        res.json(lineOwner);
+      }
+    }
+  );
 };
 
-const getLoggedInUser = async (req,res) => {
+const getLoggedInUser = async (req, res) => {
   const email = req.headers.email;
   const user = await new LineOwner().getLineOwnerByEmail(email);
   res.json(user);
-}
+};
 
 const editOwnerDetails = async (req, res) => {
   const email = req.headers.email;
@@ -40,7 +59,7 @@ const editOwnerDetails = async (req, res) => {
     return;
   }
   res.sendStatus(200);
-}
+};
 
 module.exports = {
   addNewLineOwner,

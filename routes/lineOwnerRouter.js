@@ -11,8 +11,9 @@ const {
 const {} = require("../controllers/validator");
 
 router.post("/", addNewLineOwner);
-router.post("/", loginLineOwner);
+
+router.post("/login", loginLineOwner);
 router.get("/current-user", getLoggedInUser);
-router.put("/edit", editOwnerDetails)
+router.put("/edit", editOwnerDetails);
 
 module.exports = router;
