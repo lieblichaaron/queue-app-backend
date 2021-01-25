@@ -1,5 +1,6 @@
 require("dotenv").config();
 const express = require("express");
+const cors = require("cors");
 const app = express();
 const mongoUtil = require("./utils/dbConnection");
 
@@ -11,6 +12,7 @@ mongoUtil.connectToDb(function (err, client) {
     const lineOwnerRouter = require("./routes/lineOwnerRouter");
 
     app.use(express.json());
+    app.use(cors());
 
     app.use("/owner", lineOwnerRouter);
     app.use("/line", lineRouter);
