@@ -19,8 +19,15 @@ const getLinesByOwnerId = async (req, res) => {
   res.json(lines);
 };
 
+const addShopperToLine = async (req, res) => {
+  const { id } = req.params;
+  const shopper = req.body;
+  const line = await lineInstance.addShopperToLine(id, shopper);
+  res.json(line.value);
+};
 module.exports = {
   addNewLine,
   getLineById,
   getLinesByOwnerId,
+  addShopperToLine,
 };
