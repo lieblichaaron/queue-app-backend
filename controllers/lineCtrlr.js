@@ -7,6 +7,13 @@ const addNewLine = async (req, res) => {
   res.json(lineId);
 };
 
+const getLineById = async (req, res) => {
+  const { id } = req.params;
+  const line = await lineInstance.getLineById(id);
+  res.json(line);
+};
+
 module.exports = {
   addNewLine,
+  getLineById,
 };

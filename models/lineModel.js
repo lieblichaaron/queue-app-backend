@@ -1,4 +1,5 @@
 const mongoUtil = require("../utils/dbConnection");
+const { ObjectID } = require("mongodb");
 
 module.exports = class Line {
   constructor() {
@@ -10,6 +11,17 @@ module.exports = class Line {
       const newLine = newLineCursor.ops[0];
       return newLine._id;
     } catch (err) {
+      return false;
+    }
+  };
+
+  getLineById = async (id) => {
+    try {
+      const line = await this.linesCollection.findOne({
+        _id: ObjectID(id),
+      });
+      return line;
+    } catch {
       return false;
     }
   };
