@@ -3,9 +3,8 @@ const lineInstance = new Line();
 
 const addNewLine = async (req, res) => {
   let newLine = req.body;
-  await lineInstance.addLine(newLine);
-
-  res.json("Line successfully added");
+  const lineId = await lineInstance.addLine(newLine);
+  res.json(lineId);
 };
 
 module.exports = {
