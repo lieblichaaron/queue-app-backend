@@ -54,8 +54,8 @@ const editOwnerDetails = async (req, res) => {
   try {
     await new LineOwner().changeLineOwnerSettings(req.body, email);
   } catch (err) {
-    if (err.message === "Email address is taken") console.log(err);
-    res.status(400).send("email address already exists");
+    if (err.message === "Email address is taken" )
+    res.status(400).send("email address already exists")
     return;
   }
   res.sendStatus(200);

@@ -10,7 +10,7 @@ module.exports = class Line {
       const newLineCursor = await this.linesCollection.insertOne(lineData);
       const newLine = newLineCursor.ops[0];
       return newLine._id;
-<<<<<<< HEAD
+
     } catch (err) {
       return false;
     }
@@ -31,6 +31,7 @@ module.exports = class Line {
     try {
       const cursor = await this.linesCollection.find({ ownerId });
       const lines = await cursor.toArray();
+
       return lines;
 
     } catch (err) {
@@ -49,7 +50,6 @@ module.exports = class Line {
     }
   };
 
-<<<<<<< HEAD
   addShopperToLine = async (id, shopper) => {
     try {
       const line = await this.linesCollection.findOneAndUpdate(
@@ -75,7 +75,7 @@ module.exports = class Line {
       return false;
     }
   };
-=======
+
   getLinesByOwnerId = async (ownerId) => {
     try {
       const cursor = await this.linesCollection.find({ownerId});
@@ -84,6 +84,30 @@ module.exports = class Line {
     } catch (err) {
       return err.stack;
     }
-  }
->>>>>>> e786cb242e78a63a7390d06cd9d1aa797080bbae
-};
+  };
+
+  addShopperToLine = async (id, shopper) => {
+    try {
+      const line = await this.linesCollection.findOneAndUpdate(
+        { _id: ObjectID(id) },
+        { $push: { line: shopper } },
+        { returnOriginal: false }
+      );
+      return line;
+    } catch {
+      return false;
+    }
+  };
+
+  removeShopperFromLine = async (id, shopper) => {
+    try {
+      const line = await this.linesCollection.findOneAndUpdate(
+        { _id: ObjectID(id) },
+        { $pull: { line: shopper } },
+        { returnOriginal: false }
+      );
+      return line;
+    } catch {
+      return false;
+    }
+  };
