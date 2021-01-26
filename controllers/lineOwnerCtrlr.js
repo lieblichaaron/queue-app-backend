@@ -69,14 +69,19 @@ const getLoggedInUser = async (req, res) => {
 };
 
 const editOwnerDetails = async (req, res) => {
-  const email = req.headers.email;
+  const token = await jwt.verifyToken(req.headers.authorization)
+  if (!token) {
+    res.status(401).send("no valid token found in authorization header")
+    return
+  }
   try {
-    await new LineOwner().changeLineOwnerSettings(req.body, email);
+    const user = await new LineOwner().changeLineOwnerSettings(req.body, token.email);
+    const newToken = await jwt.createToken(user)
+    res.send(newToken);
   } catch (err) {
     res.status(400).send("email address already exists");
     return;
   }
-  res.sendStatus(200);
 };
 
 const editOwnerPassword = async (req, res) => {
