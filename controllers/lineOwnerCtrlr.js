@@ -1,4 +1,5 @@
 const bcrypt = require("bcrypt");
+const jwt = require("../utils/auth");
 
 const LineOwner = require("../models/lineOwnerModel");
 const lineOwnerInstance = new LineOwner();
@@ -15,7 +16,11 @@ const addNewLineOwner = async (req, res) => {
 
   newOwner.password = await bcrypt.hash(newOwner.password, 10);
   await lineOwnerInstance.addLineOwner(newOwner);
-  res.status(200).json(newOwner);
+  const authToken = await jwt.createToken(newOwner);
+  res.status(200).json({
+    authToken: authToken,
+    displayName: newOwner.displayName,
+  });
 };
 
 const loginLineOwner = async (req, res) => {
@@ -29,14 +34,24 @@ const loginLineOwner = async (req, res) => {
   }
 
   const lineOwner = await lineOwnerInstance.getLineOwnerByEmail(body.email);
-  console.log(lineOwner);
+
+  if (!lineOwner) {
+    return res.status(400).json({
+      success: false,
+      error: "Wrong login information",
+    });
+  }
 
   await bcrypt.compare(
     body.password,
     lineOwner.password,
     async (err, result) => {
       if (result) {
-        res.status(200).json(lineOwner);
+        const authToken = await jwt.createToken(lineOwner);
+        res.status(200).json({
+          authToken: authToken,
+          displayName: lineOwner.displayName,
+        });
       } else {
         res.status(400).json({
           success: false,
