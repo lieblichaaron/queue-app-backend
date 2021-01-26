@@ -7,6 +7,7 @@ const {
   getLinesByOwnerId,
   addShopperToLine,
   removeShopperFromLine,
+  getLineByIdOnChange,
 } = require("../controllers/lineCtrlr");
 
 const {} = require("../controllers/validator");
@@ -14,6 +15,8 @@ const {} = require("../controllers/validator");
 router.post("", addNewLine);
 
 router.get("/:id", getLineById);
+
+router.get("/watch/:id", getLineByIdOnChange);
 
 router.get("/owned-by/:id", getLinesByOwnerId);
 

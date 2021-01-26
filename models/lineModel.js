@@ -47,7 +47,20 @@ module.exports = class Line {
       return false;
     }
   };
-
+  getLineByIdOnChange = async (id) => {
+    try {
+      const line = await this.linesCollection.watch(
+        [{ $match: { "fullDocument._id": ObjectID(id) } }],
+        {
+          fullDocument: "updateLookup",
+        }
+      );
+      const next = await line.next();
+      return next.fullDocument;
+    } catch {
+      return false;
+    }
+  };
   addShopperToLine = async (id, shopper) => {
     try {
       const line = await this.linesCollection.findOneAndUpdate(
