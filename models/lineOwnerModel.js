@@ -58,7 +58,8 @@ module.exports = class LineOwner {
       updateDoc.$set.displayName = accountSettings.displayName;
 
     try {
-      await this.lineOwnersCollection.findOneAndUpdate(filter, updateDoc);
+      const newUser = await this.lineOwnersCollection.findOneAndUpdate(filter, updateDoc, {returnOriginal: false});
+      return newUser.value;
     } catch (err) {
       return err.stack;
     }
@@ -70,7 +71,8 @@ module.exports = class LineOwner {
         $set: { password },
       };
       try {
-        await this.lineOwnersCollection.findOneAndUpdate(filter, updateDoc);
+        const newUser = await this.lineOwnersCollection.findOneAndUpdate(filter, updateDoc, {returnOriginal: false});
+        return newUser.value
       } catch (err) {
         return err.stack;
       }
