@@ -58,11 +58,30 @@ const editOwnerDetails = async (req, res) => {
   try {
     await new LineOwner().changeLineOwnerSettings(req.body, email);
   } catch (err) {
-    if (err.message === "Email address is taken")
-      res.status(400).send("email address already exists");
+    res.status(400).send("email address already exists");
     return;
   }
   res.sendStatus(200);
+};
+
+const editOwnerPassword = async (req, res) => {
+  const email = req.headers.email;
+  const lineOwnerInstance = new LineOwner();
+  const user = await lineOwnerInstance.getLineOwnerByEmail(email);
+  bcrypt.compare(req.body.oldPassword, user.password, async (err, result) => {
+    if (err) {
+      res.status(500).send("something went wrong when checking password");
+      return;
+    }
+    if (!result) res.status(400).send("password is incorrect");
+    if (result) {
+      bcrypt.hash(req.body.newPassword, 10, async (err, hash) => {
+        if (err) throw err;
+       lineOwnerInstance.changeLineOwnerPassword(email, hash);
+      });
+      res.sendStatus(200);
+    }
+  });
 };
 
 module.exports = {
@@ -70,4 +89,5 @@ module.exports = {
   loginLineOwner,
   getLoggedInUser,
   editOwnerDetails,
+  editOwnerPassword,
 };

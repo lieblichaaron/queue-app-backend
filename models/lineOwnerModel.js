@@ -63,37 +63,17 @@ module.exports = class LineOwner {
       return err.stack;
     }
   };
-  changeLineOwnerPassword = async (updateObject) => {
-    /**
-     * @param {Object} updateObject - Changes to user settings
-     * @param {string} updateObject.id
-     * @param {string} updateObject.oldPassword
-     * @param {string} updateObject.newPassword
-     */
+  changeLineOwnerPassword = async (email, password) => {
 
-    const filter = { _id: ObjectID(updateObject.id) };
-    const projection = { password: 1 };
-    try {
-      const user = await this.lineOwnersCollection.findOne(filter);
-    } catch (err) {
-      return err.stack;
-    }
-    const isCorrectPassword = await validate.comparePasswordHash(
-      updateObject.oldPassword,
-      user.password
-    );
-    if (!isCorrectPassword) {
-      return validate.InvalidPasswordError("incorrect password");
-    }
-    const updateDoc = {
-      $set: {
-        password: hashedPassword,
-      },
-    };
-    try {
-      await this.lineOwnersCollection.findOneAndUpdate(filter, updateDoc);
-    } catch (err) {
-      return err.stack;
-    }
+      const filter = { email };
+      const updateDoc = {
+        $set: { password },
+      };
+      try {
+        await this.lineOwnersCollection.findOneAndUpdate(filter, updateDoc);
+      } catch (err) {
+        return err.stack;
+      }
+
   };
 };
