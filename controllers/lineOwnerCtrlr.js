@@ -69,22 +69,35 @@ const getLoggedInUser = async (req, res) => {
 };
 
 const editOwnerDetails = async (req, res) => {
-  const email = req.headers.email;
+  const token = await jwt.verifyToken(req.headers.authorization);
+  if (!token) {
+    res.status(401).send("no valid token found in authorization header");
+    return;
+  }
   try {
-    await new LineOwner().changeLineOwnerSettings(req.body, email);
+    const user = await new LineOwner().changeLineOwnerSettings(
+      req.body,
+      token.email
+    );
+    const newToken = await jwt.createToken(user);
+    res.send(newToken);
   } catch (err) {
     res.status(400).send("email address already exists");
     return;
   }
-  res.sendStatus(200);
 };
 
 const editOwnerPassword = async (req, res) => {
-  const email = req.headers.email;
+  const token = await jwt.verifyToken(req.headers.authorization);
+  if (!token) {
+    res.status(401).send("no valid token found in authorization header");
+    return;
+  }
   const lineOwnerInstance = new LineOwner();
-  const user = await lineOwnerInstance.getLineOwnerByEmail(email);
+  const user = await lineOwnerInstance.getLineOwnerByEmail(token.email);
   bcrypt.compare(req.body.oldPassword, user.password, async (err, result) => {
     if (err) {
+      console.log('wrong here')
       res.status(500).send("something went wrong when checking password");
       return;
     }
@@ -92,9 +105,12 @@ const editOwnerPassword = async (req, res) => {
     if (result) {
       bcrypt.hash(req.body.newPassword, 10, async (err, hash) => {
         if (err) throw err;
-       lineOwnerInstance.changeLineOwnerPassword(email, hash);
+        const user = await lineOwnerInstance.changeLineOwnerPassword(token.email, hash);
+        console.log(user)
       });
-      res.sendStatus(200);
+      const newToken = await jwt.createToken(user);
+
+      res.send(newToken);
     }
   });
 };
