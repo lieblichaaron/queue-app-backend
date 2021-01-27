@@ -26,6 +26,59 @@ module.exports = class Line {
     }
   };
 
+<<<<<<< Updated upstream
+=======
+  getLineById = async (id) => {
+    try {
+      const line = await this.linesCollection.findOne({
+        _id: ObjectID(id),
+      });
+      return line;
+    } catch {
+      return false;
+    }
+  };
+  getLineByIdOnChange = async (id) => {
+    try {
+      const line = await this.linesCollection.watch(
+        [{ $match: { "fullDocument._id": ObjectID(id) } }],
+        {
+          fullDocument: "updateLookup",
+        }
+      );
+      const next = await line.next();
+      return next.fullDocument;
+    } catch {
+      return false;
+    }
+  };
+  addShopperToLine = async (id, shopper) => {
+    try {
+      const line = await this.linesCollection.findOneAndUpdate(
+        { _id: ObjectID(id) },
+        { $push: { line: shopper } },
+        { returnOriginal: false }
+      );
+      return line.value;
+    } catch {
+      return false;
+    }
+  };
+
+  removeShopperFromLine = async (id, shopper) => {
+    try {
+      const line = await this.linesCollection.findOneAndUpdate(
+        { _id: ObjectID(id) },
+        { $pull: { line: shopper } },
+        { returnOriginal: false }
+      );
+      return line;
+    } catch {
+      return false;
+    }
+  };
+
+>>>>>>> Stashed changes
   getLinesByOwnerId = async (ownerId) => {
     try {
       const cursor = await this.linesCollection.find({ ownerId });
