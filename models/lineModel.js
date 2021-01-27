@@ -26,16 +26,6 @@ module.exports = class Line {
     }
   };
 
-  getLineById = async (id) => {
-    try {
-      const line = await this.linesCollection.findOne({
-        _id: ObjectID(id),
-      });
-      return line;
-    } catch {
-      return false;
-    }
-  };
   getLineByIdOnChange = async (id) => {
     try {
       const line = await this.linesCollection.watch(
@@ -64,9 +54,9 @@ module.exports = class Line {
           { _id: ObjectID(id), "line.waitTime": 0 },
           { $set: { "line.$.serviceStartTime": new Date().getTime() } }
         );
+        return newLine.value;
       }
-      if (newLine) return newLine.value;
-      if (line) return line.value;
+      return line.value;
     } catch {
       return false;
     }
@@ -88,41 +78,42 @@ module.exports = class Line {
 
   serveNextCustomer = async (lineId) => {
     try {
-    const line = await this.linesCollection.findOne({
-      _id: ObjectID(lineId),
-    });
-    const servedCustomer = line.line[0];
-    const nextCustNumber = line.line[1].number;
-    const serviceTime =
-      Math.ceil(new Date().getTime() - servedCustomer.serviceStartTime) / 60000;
-    const waitTime =
-      Math.ceil(servedCustomer.serviceStartTime - servedCustomer.joinTime) /
-      60000;
-    const newLine = await this.linesCollection.findOneAndUpdate(
-      { _id: ObjectID(lineId), "line.number": nextCustNumber },
-      {
-        $pop: { line: -1 },
+      const line = await this.linesCollection.findOne({
+        _id: ObjectID(lineId),
+      });
+      const servedCustomer = line.line[0];
+      const nextCustNumber = line.line[1].number;
+      const serviceTime =
+        Math.ceil(new Date().getTime() - servedCustomer.serviceStartTime) /
+        60000;
+      const waitTime =
+        Math.ceil(servedCustomer.serviceStartTime - servedCustomer.joinTime) /
+        60000;
+      const newLine = await this.linesCollection.findOneAndUpdate(
+        { _id: ObjectID(lineId), "line.number": nextCustNumber },
+        {
+          $pop: { line: -1 },
 
-        $push: { serviceTimes: serviceTime, waitTimes: waitTime },
-      },
-      { returnOriginal: false }
-    );
-    await this.linesCollection.updateOne(
-      { _id: ObjectID(lineId), "line.number": nextCustNumber },
-      { $set: { "line.$.serviceStart": new Date().getTime() } }
-    );
-    const serviceTimes = newLine.value.serviceTimes;
-    const waitTimes = newLine.value.waitTimes;
-    const avgServiceTime = Math.floor(
-      serviceTimes.reduce((a, b) => a + b, 0) / serviceTimes.length
-    );
-    const avgWaitTime = Math.floor(
-      waitTimes.reduce((a, b) => a + b, 0) / serviceTimes.length
-    );
-    return {
-      avgServiceTime,
-      avgWaitTime,
-    };
+          $push: { serviceTimes: serviceTime, waitTimes: waitTime },
+        },
+        { returnOriginal: false }
+      );
+      await this.linesCollection.updateOne(
+        { _id: ObjectID(lineId), "line.number": nextCustNumber },
+        { $set: { "line.$.serviceStart": new Date().getTime() } }
+      );
+      const serviceTimes = newLine.value.serviceTimes;
+      const waitTimes = newLine.value.waitTimes;
+      const avgServiceTime = Math.floor(
+        serviceTimes.reduce((a, b) => a + b, 0) / serviceTimes.length
+      );
+      const avgWaitTime = Math.floor(
+        waitTimes.reduce((a, b) => a + b, 0) / serviceTimes.length
+      );
+      return {
+        avgServiceTime,
+        avgWaitTime,
+      };
     } catch {
       return false;
     }
