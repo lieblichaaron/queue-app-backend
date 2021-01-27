@@ -57,7 +57,7 @@ module.exports = class Line {
         { $push: { line: shopper } },
         { returnOriginal: false }
       );
-      return line;
+      return line.value;
     } catch {
       return false;
     }

@@ -25,15 +25,22 @@ const getLineByIdOnChange = async (req, res) => {
 const addShopperToLine = async (req, res) => {
   const { id } = req.params;
   const shopper = req.body;
-  const line = await lineInstance.addShopperToLine(id, shopper);
-  res.json(line.value);
+  const line = await lineInstance.getLineById(id);
+  let newLine;
+  if (line.isActive) {
+    newLine = await lineInstance.addShopperToLine(id, shopper);
+  } else {
+    newLine =
+      "The line is currently closed, we're sorry for the inconvenience.";
+  }
+  res.json(newLine);
 };
 
 const removeShopperFromLine = async (req, res) => {
   const { id } = req.params;
   const shopper = req.body;
   await lineInstance.removeShopperFromLine(id, shopper);
-  res.json("You have left the line");
+  res.json("You have left the line.");
 };
 module.exports = {
   addNewLine,
