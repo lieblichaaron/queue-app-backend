@@ -85,30 +85,4 @@ module.exports = class Line {
       return err.stack;
     }
   };
-
-  addShopperToLine = async (id, shopper) => {
-    try {
-      const line = await this.linesCollection.findOneAndUpdate(
-        { _id: ObjectID(id) },
-        { $push: { line: shopper } },
-        { returnOriginal: false }
-      );
-      return line;
-    } catch {
-      return false;
-    }
-  };
-
-  removeShopperFromLine = async (id, shopper) => {
-    try {
-      const line = await this.linesCollection.findOneAndUpdate(
-        { _id: ObjectID(id) },
-        { $pull: { line: shopper } },
-        { returnOriginal: false }
-      );
-      return line;
-    } catch {
-      return false;
-    }
-  };
 };
