@@ -61,8 +61,15 @@ const removeShopperFromLine = async (req, res) => {
 
 const serveNextCustomer = async (req, res) => {
   const lineId = req.params.id;
-  const line = await lineInstance.serveNextCustomer(lineId);
-  res.json('Service complete');
+  const result = await lineInstance.serveNextCustomer(lineId);
+  res.json(result);
+}
+
+const setLineActiveStatus = async (req,res) => {
+  const {id} = req.params;
+  const {isActive} = req.body;
+  const status = await lineInstance.setLineActiveStatus(id, isActive)
+  res.send(status)
 }
 
 module.exports = {
@@ -72,4 +79,5 @@ module.exports = {
   removeShopperFromLine,
   serveNextCustomer,
   getLineByIdOnChange,
+  setLineActiveStatus
 };

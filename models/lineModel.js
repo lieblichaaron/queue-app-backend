@@ -60,7 +60,7 @@ module.exports = class Line {
       );
       if (line.value.line.length === 1) {
         const newLine = await this.linesCollection.findOneAndUpdate(
-          { _id: ObjectID(id), "line.waitTime" : 0 },
+          { _id: ObjectID(id), "line.waitTime": 0 },
           { $set: { "line.$.serviceStartTime": new Date().getTime() } }
         );
       }
@@ -69,6 +69,18 @@ module.exports = class Line {
       return false;
     }
   };
+
+  setLineActiveStatus = async (lineId, isActive) => {
+    try {
+      const line = await this.linesCollection.findOneAndUpdate({
+        _id: ObjectID(lineId),
+      },
+      {$set: {isActive}})
+      return {isActive};
+    } catch {
+      return false;
+    }
+  }
 
   serveNextCustomer = async (lineId) => {
     try {
@@ -89,9 +101,19 @@ module.exports = class Line {
         {
           $pop: { line: -1 },
           $push: { serviceTimes: serviceTime, waitTimes: waitTime },
-        }
+        },
+        { returnOriginal: false }
       );
-      return newLine.value;
+      const serviceTimes = newLine.value.line.serviceTimes;
+      const waitTimes = newLine.value.line.waitTimes;
+      const avgServiceTime =
+        serviceTimes.reduce((a, b) => a + b, 0) / serviceTimes.length;
+      const avgWaitTime =
+        waitTimes.reduce((a, b) => a + b, 0) / serviceTimes.length;
+      return {
+        avgServiceTime,
+        avgWaitTime,
+      };
     } catch {
       return false;
     }
