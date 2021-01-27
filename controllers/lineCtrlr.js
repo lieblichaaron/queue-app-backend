@@ -40,6 +40,7 @@ const addShopperToLine = async (req, res) => {
   if (line.isActive) {
     newLine = await lineInstance.addShopperToLine(id, {
       joinTime: new Date().getTime(),
+      lineId: line._id,
       number: number,
       serviceTime: 0,
       waitTime: 0,
