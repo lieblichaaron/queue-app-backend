@@ -1,6 +1,8 @@
 const bcrypt = require("bcrypt");
+const jwt = require("../utils/auth");
 
 const LineOwner = require("../models/lineOwnerModel");
+const lineOwnerInstance = new LineOwner();
 
 const addNewLineOwner = async (req, res) => {
   let newOwner = await req.body;
@@ -12,39 +14,122 @@ const addNewLineOwner = async (req, res) => {
     });
   }
 
-  // Call lineOwnerModel method to check if email already exists
-
-  const lineOwnerInstance = new LineOwner(newOwner);
   newOwner.password = await bcrypt.hash(newOwner.password, 10);
   await lineOwnerInstance.addLineOwner(newOwner);
-  res.json(newOwner);
+  const authToken = await jwt.createToken(newOwner);
+  res.status(200).json({
+    authToken: authToken,
+    displayName: newOwner.displayName,
+  });
 };
 
 const loginLineOwner = async (req, res) => {
-  res.json();
+  let body = await req.body;
+
+  if (!body) {
+    return res.status(400).json({
+      success: false,
+      error: "No email provided",
+    });
+  }
+
+  const lineOwner = await lineOwnerInstance.getLineOwnerByEmail(body.email);
+
+  if (!lineOwner) {
+    return res.status(400).json({
+      success: false,
+      error: "Wrong login information",
+    });
+  }
+
+  await bcrypt.compare(
+    body.password,
+    lineOwner.password,
+    async (err, result) => {
+      if (result) {
+        const authToken = await jwt.createToken(lineOwner);
+        res.status(200).json({
+          authToken: authToken,
+          displayName: lineOwner.displayName,
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          error: "Wrong password",
+        });
+      }
+    }
+  );
 };
 
-const getLoggedInUser = async (req,res) => {
+const getLoggedInUser = async (req, res) => {
   const email = req.headers.email;
-  const user = await new LineOwner().getLineOwnerByEmail(email);
+  const user = await lineOwnerInstance.getLineOwnerByEmail(email);
   res.json(user);
-}
+};
+
+const getLinesByOwnerId = async (req, res) => {
+  const ownerId = req.params.id;
+  try {
+    const lines = await lineOwnerInstance.getLinesByOwnerId(ownerId);
+    res.json(lines);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+};
 
 const editOwnerDetails = async (req, res) => {
-  const email = req.headers.email;
-  try {
-    await new LineOwner().changeLineOwnerSettings(req.body, email);
-  } catch (err) {
-    if (err.message === "Email address is taken" )
-    res.status(400).send("email address already exists")
+  const token = await jwt.verifyToken(req.headers.authorization);
+  if (!token) {
+    res.status(401).send("no valid token found in authorization header");
     return;
   }
-  res.sendStatus(200);
-}
+  try {
+    const user = await lineOwnerInstance.changeLineOwnerSettings(
+      req.body,
+      token.email
+    );
+    const newToken = await jwt.createToken(user);
+    res.send(newToken);
+  } catch (err) {
+    res.status(400).send("email address already exists");
+    return;
+  }
+};
+
+const editOwnerPassword = async (req, res) => {
+  const token = await jwt.verifyToken(req.headers.authorization);
+  if (!token) {
+    res.status(401).send("no valid token found in authorization header");
+    return;
+  }
+  const user = await lineOwnerInstance.getLineOwnerByEmail(token.email);
+  bcrypt.compare(req.body.oldPassword, user.password, async (err, result) => {
+    if (err) {
+      res.status(500).send("something went wrong when checking password");
+      return;
+    }
+    if (!result) res.status(400).send("password is incorrect");
+    if (result) {
+      bcrypt.hash(req.body.newPassword, 10, async (err, hash) => {
+        if (err) throw err;
+        const user = await lineOwnerInstance.changeLineOwnerPassword(
+          token.email,
+          hash
+        );
+      });
+      const newToken = await jwt.createToken(user);
+
+      res.send(newToken);
+    }
+  });
+};
 
 module.exports = {
   addNewLineOwner,
   loginLineOwner,
   getLoggedInUser,
+  getLinesByOwnerId,
   editOwnerDetails,
+  editOwnerPassword,
 };

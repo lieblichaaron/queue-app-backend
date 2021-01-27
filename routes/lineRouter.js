@@ -4,17 +4,18 @@ const router = express.Router();
 const {
   addNewLine,
   getLineById,
-  getLinesByOwnerId,
   addShopperToLine,
   removeShopperFromLine,
+  getLineByIdOnChange,
 } = require("../controllers/lineCtrlr");
+
 const {} = require("../controllers/validator");
 
 router.post("", addNewLine);
 
 router.get("/:id", getLineById);
 
-router.get("/owned-by/:id", getLinesByOwnerId);
+router.get("/watch/:id", getLineByIdOnChange);
 
 router.put("/add-shopper/:id", addShopperToLine);
 

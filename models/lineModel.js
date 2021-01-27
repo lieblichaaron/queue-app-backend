@@ -9,7 +9,7 @@ module.exports = class Line {
     try {
       const newLineCursor = await this.linesCollection.insertOne(lineData);
       const newLine = newLineCursor.ops[0];
-      return newLine._id;
+      return newLine;
     } catch (err) {
       return false;
     }
@@ -26,8 +26,11 @@ module.exports = class Line {
     }
   };
 
+<<<<<<< HEAD
 <<<<<<< Updated upstream
 =======
+=======
+>>>>>>> f5ab310887815af1154edfb178f36f8d2b52f98c
   getLineById = async (id) => {
     try {
       const line = await this.linesCollection.findOne({
@@ -59,7 +62,11 @@ module.exports = class Line {
         { $push: { line: shopper } },
         { returnOriginal: false }
       );
+<<<<<<< HEAD
       return line.value;
+=======
+      return line;
+>>>>>>> f5ab310887815af1154edfb178f36f8d2b52f98c
     } catch {
       return false;
     }
@@ -78,7 +85,10 @@ module.exports = class Line {
     }
   };
 
+<<<<<<< HEAD
 >>>>>>> Stashed changes
+=======
+>>>>>>> f5ab310887815af1154edfb178f36f8d2b52f98c
   getLinesByOwnerId = async (ownerId) => {
     try {
       const cursor = await this.linesCollection.find({ ownerId });

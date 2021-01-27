@@ -5,6 +5,7 @@ const validate = require("../controllers/validator");
 module.exports = class LineOwner {
   constructor() {
     this.lineOwnersCollection = mongoUtil.getDb().collection("lineOwners");
+    this.linesCollection = mongoUtil.getDb().collection("lines");
   }
   addLineOwner = async (ownerData) => {
     try {
@@ -13,6 +14,17 @@ module.exports = class LineOwner {
       );
       const newOwner = newOwnerCursor.ops[0];
       return newOwner;
+    } catch (err) {
+      return err.stack;
+    }
+  };
+  addLineToOwner = async (lineId, ownerId) => {
+    try {
+      const line = await this.lineOwnersCollection.findOneAndUpdate(
+        { _id: ObjectID(ownerId) },
+        { $push: { lines: lineId } }
+      );
+      return line;
     } catch (err) {
       return err.stack;
     }
@@ -35,6 +47,21 @@ module.exports = class LineOwner {
       return err.stack;
     }
   };
+
+  getLinesByOwnerId = async (ownerId) => {
+    const lineIds = await this.lineOwnersCollection.findOne(
+      { _id: ObjectID(ownerId) },
+      { projection: { _id: 1, lines: 1 } }
+    );
+    if (!lineIds.lines) return [];
+    const lineObjectIds = lineIds.lines.map((id) => ObjectID(id));
+    const cursor = await this.linesCollection.find({
+      _id: { $in: lineObjectIds },
+    });
+    const lines = await cursor.toArray();
+    return lines;
+  };
+
   changeLineOwnerSettings = async (accountSettings, oldEmail) => {
     /**
      * @param {Object} accountSettings - Changes to user settings
@@ -47,7 +74,7 @@ module.exports = class LineOwner {
     let updateDoc = {
       $set: {},
     };
-    if (accountSettings.email) {
+    if (accountSettings.email && accountSettings.email !== oldEmail) {
       const existingUser = await this.getLineOwnerByEmail(
         accountSettings.email
       );
@@ -58,40 +85,28 @@ module.exports = class LineOwner {
       updateDoc.$set.displayName = accountSettings.displayName;
 
     try {
-      await this.lineOwnersCollection.findOneAndUpdate(filter, updateDoc);
+      const newUser = await this.lineOwnersCollection.findOneAndUpdate(
+        filter,
+        updateDoc,
+        { returnOriginal: false }
+      );
+      return newUser.value;
     } catch (err) {
       return err.stack;
     }
   };
-  changeLineOwnerPassword = async (updateObject) => {
-    /**
-     * @param {Object} updateObject - Changes to user settings
-     * @param {string} updateObject.id
-     * @param {string} updateObject.oldPassword
-     * @param {string} updateObject.newPassword
-     */
-
-    const filter = { _id: ObjectID(updateObject.id) };
-    const projection = { password: 1 };
-    try {
-      const user = await this.lineOwnersCollection.findOne(filter);
-    } catch (err) {
-      return err.stack;
-    }
-    const isCorrectPassword = await validate.comparePasswordHash(
-      updateObject.oldPassword,
-      user.password
-    );
-    if (!isCorrectPassword) {
-      return validate.InvalidPasswordError("incorrect password");
-    }
+  changeLineOwnerPassword = async (email, password) => {
+    const filter = { email };
     const updateDoc = {
-      $set: {
-        password: hashedPassword,
-      },
+      $set: { password },
     };
     try {
-      await this.lineOwnersCollection.findOneAndUpdate(filter, updateDoc);
+      const newUser = await this.lineOwnersCollection.findOneAndUpdate(
+        filter,
+        updateDoc,
+        { returnOriginal: false }
+      );
+      return newUser.value;
     } catch (err) {
       return err.stack;
     }
