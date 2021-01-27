@@ -26,17 +26,6 @@ module.exports = class Line {
     }
   };
 
-  getLinesByOwnerId = async (ownerId) => {
-    try {
-      const cursor = await this.linesCollection.find({ ownerId });
-      const lines = await cursor.toArray();
-
-      return lines;
-    } catch (err) {
-      return false;
-    }
-  };
-
   getLineById = async (id) => {
     try {
       const line = await this.linesCollection.findOne({

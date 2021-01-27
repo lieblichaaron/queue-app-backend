@@ -64,8 +64,18 @@ const loginLineOwner = async (req, res) => {
 
 const getLoggedInUser = async (req, res) => {
   const email = req.headers.email;
-  const user = await new LineOwner().getLineOwnerByEmail(email);
+  const user = await lineOwnerInstance.getLineOwnerByEmail(email);
   res.json(user);
+};
+
+const getLinesByOwnerId = async (req, res) => {
+  const ownerId = req.params.id;
+  try {
+    const lines = await lineOwnerInstance.getLinesByOwnerId(ownerId);
+    res.json(lines);
+  } catch (err) {
+    res.status(500).send(err);
+  }
 };
 
 const editOwnerDetails = async (req, res) => {
@@ -75,7 +85,7 @@ const editOwnerDetails = async (req, res) => {
     return;
   }
   try {
-    const user = await new LineOwner().changeLineOwnerSettings(
+    const user = await lineOwnerInstance.changeLineOwnerSettings(
       req.body,
       token.email
     );
@@ -93,11 +103,9 @@ const editOwnerPassword = async (req, res) => {
     res.status(401).send("no valid token found in authorization header");
     return;
   }
-  const lineOwnerInstance = new LineOwner();
   const user = await lineOwnerInstance.getLineOwnerByEmail(token.email);
   bcrypt.compare(req.body.oldPassword, user.password, async (err, result) => {
     if (err) {
-      console.log('wrong here')
       res.status(500).send("something went wrong when checking password");
       return;
     }
@@ -105,8 +113,10 @@ const editOwnerPassword = async (req, res) => {
     if (result) {
       bcrypt.hash(req.body.newPassword, 10, async (err, hash) => {
         if (err) throw err;
-        const user = await lineOwnerInstance.changeLineOwnerPassword(token.email, hash);
-        console.log(user)
+        const user = await lineOwnerInstance.changeLineOwnerPassword(
+          token.email,
+          hash
+        );
       });
       const newToken = await jwt.createToken(user);
 
@@ -119,6 +129,7 @@ module.exports = {
   addNewLineOwner,
   loginLineOwner,
   getLoggedInUser,
+  getLinesByOwnerId,
   editOwnerDetails,
   editOwnerPassword,
 };

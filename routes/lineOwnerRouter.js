@@ -5,6 +5,7 @@ const {
   addNewLineOwner,
   loginLineOwner,
   getLoggedInUser,
+  getLinesByOwnerId,
   editOwnerDetails,
   editOwnerPassword,
 } = require("../controllers/lineOwnerCtrlr");
@@ -15,6 +16,7 @@ router.post("/", addNewLineOwner);
 
 router.post("/login", loginLineOwner);
 router.get("/current-user", getLoggedInUser);
+router.get("/:id/lines", getLinesByOwnerId);
 router.put("/edit", editOwnerDetails);
 router.put("/password", editOwnerPassword);
 
