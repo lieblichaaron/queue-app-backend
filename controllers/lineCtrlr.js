@@ -24,11 +24,25 @@ const getLineByIdOnChange = async (req, res) => {
 
 const addShopperToLine = async (req, res) => {
   const { id } = req.params;
-  const shopper = req.body;
   const line = await lineInstance.getLineById(id);
+  let number;
+  if (Array.isArray(line.line) && line.line.length > 0) {
+    const prevNumber = line.line[line.line.length - 1].number;
+    if (prevNumber === 99) {
+      number = 1;
+    } else {
+      number = prevNumber + 1; 
+    }
+  } else {
+    number = 1;
+  }
   let newLine;
   if (line.isActive) {
-    newLine = await lineInstance.addShopperToLine(id, shopper);
+    newLine = await lineInstance.addShopperToLine(id, 
+      {
+        joinTime: new Date().getTime(),
+        number: number
+      });
   } else {
     newLine =
       "The line is currently closed, we're sorry for the inconvenience.";
@@ -48,6 +62,7 @@ const serveNextCustomer = async (req, res) => {
   const line = await lineInstance.serveNextCustomer(lineId);
   res.json('Service complete');
 }
+
 module.exports = {
   addNewLine,
   getLineById,
