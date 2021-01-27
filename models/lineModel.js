@@ -53,8 +53,9 @@ module.exports = class Line {
           { _id: ObjectID(id), "line.waitTime": 0 },
           { $set: { "line.$.serviceStartTime": new Date().getTime() } }
         );
+        return newLine.value;
       }
-      return newLine.value;
+      return line.value;
     } catch {
       return false;
     }
