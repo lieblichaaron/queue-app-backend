@@ -58,7 +58,6 @@ module.exports = class Line {
         { $push: { line: shopper } },
         { returnOriginal: false }
       );
-        console.log(line.value.line)
       if (line.value.line.length === 1) {
         const newLine = await this.linesCollection.findOneAndUpdate(
           { _id: ObjectID(id), "line.waitTime" : 0 },
