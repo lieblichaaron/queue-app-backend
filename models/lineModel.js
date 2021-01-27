@@ -50,6 +50,7 @@ module.exports = class Line {
       return false;
     }
   };
+
   addShopperToLine = async (id, shopper) => {
     try {
       const line = await this.linesCollection.findOneAndUpdate(
@@ -57,7 +58,40 @@ module.exports = class Line {
         { $push: { line: shopper } },
         { returnOriginal: false }
       );
+      if (line.value.length === 1) {
+        await this.linesCollection.updateOne(
+          { _id: ObjectID(id) },
+          { $set: { "line.$.serviceStartTime": new Date().getTime() } }
+        );
+      }
       return line.value;
+    } catch {
+      return false;
+    }
+  };
+
+  serveNextCustomer = async (lineId) => {
+    try {
+      const line = await this.linesCollection.findOne({
+        _id: ObjectID(lineId),
+      });
+      const servedCustomer = line.line[0];
+      const serviceTime = (
+        (new Date().getTime() - servedCustomer.serviceStartTime) /
+        60000
+      ).toFixed(0);
+      const waitTime = (
+        (servedCustomer.serviceStartTime - servedCustomer.joinTime) /
+        60000
+      ).toFixed(0);
+      const newLine = await this.linesCollection.findOneAndUpdate(
+        { _id: ObjectID(lineId) },
+        {
+          $pop: { line: -1 },
+          $push: { serviceTimes: serviceTime, waitTimes: waitTime },
+        }
+      );
+      return newLine.value;
     } catch {
       return false;
     }
