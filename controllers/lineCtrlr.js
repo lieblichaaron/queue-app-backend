@@ -1,10 +1,13 @@
 const Line = require("../models/lineModel");
 const lineInstance = new Line();
+const LineOwner = require("../models/lineOwnerModel");
+const lineOwnerInstance = new LineOwner();
 
 const addNewLine = async (req, res) => {
   let newLine = req.body;
-  const lineId = await lineInstance.addLine(newLine);
-  res.json(lineId);
+  const line = await lineInstance.addLine(newLine);
+  await lineOwnerInstance.addLineToOwner(line._id.toString(), line.ownerId);
+  res.json(line._id);
 };
 
 const getLineById = async (req, res) => {
