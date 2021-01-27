@@ -17,6 +17,17 @@ module.exports = class LineOwner {
       return err.stack;
     }
   };
+  addLineToOwner = async (lineId, ownerId) => {
+    try {
+      const line = await this.lineOwnersCollection.findOneAndUpdate(
+        { _id: ObjectID(ownerId) },
+        { $push: { lines: lineId } }
+      );
+      return line;
+    } catch (err) {
+      return err.stack;
+    }
+  };
   getLineOwnerByEmail = async (email) => {
     try {
       const lineOwner = await this.lineOwnersCollection.findOne({ email });
@@ -58,24 +69,30 @@ module.exports = class LineOwner {
       updateDoc.$set.displayName = accountSettings.displayName;
 
     try {
-      const newUser = await this.lineOwnersCollection.findOneAndUpdate(filter, updateDoc, {returnOriginal: false});
+      const newUser = await this.lineOwnersCollection.findOneAndUpdate(
+        filter,
+        updateDoc,
+        { returnOriginal: false }
+      );
       return newUser.value;
     } catch (err) {
       return err.stack;
     }
   };
   changeLineOwnerPassword = async (email, password) => {
-
-      const filter = { email };
-      const updateDoc = {
-        $set: { password },
-      };
-      try {
-        const newUser = await this.lineOwnersCollection.findOneAndUpdate(filter, updateDoc, {returnOriginal: false});
-        return newUser.value
-      } catch (err) {
-        return err.stack;
-      }
-
+    const filter = { email };
+    const updateDoc = {
+      $set: { password },
+    };
+    try {
+      const newUser = await this.lineOwnersCollection.findOneAndUpdate(
+        filter,
+        updateDoc,
+        { returnOriginal: false }
+      );
+      return newUser.value;
+    } catch (err) {
+      return err.stack;
+    }
   };
 };

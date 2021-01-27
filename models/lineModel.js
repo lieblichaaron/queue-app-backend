@@ -9,7 +9,7 @@ module.exports = class Line {
     try {
       const newLineCursor = await this.linesCollection.insertOne(lineData);
       const newLine = newLineCursor.ops[0];
-      return newLine._id;
+      return newLine;
     } catch (err) {
       return false;
     }
