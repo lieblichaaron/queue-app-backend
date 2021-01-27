@@ -42,10 +42,17 @@ const removeShopperFromLine = async (req, res) => {
   await lineInstance.removeShopperFromLine(id, shopper);
   res.json("You have left the line.");
 };
+
+const serveNextCustomer = async (req, res) => {
+  const lineId = req.params.id;
+  const line = await lineInstance.serveNextCustomer(lineId);
+  res.json('Service complete');
+}
 module.exports = {
   addNewLine,
   getLineById,
   addShopperToLine,
   removeShopperFromLine,
+  serveNextCustomer,
   getLineByIdOnChange,
 };
