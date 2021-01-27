@@ -41,7 +41,9 @@ const addShopperToLine = async (req, res) => {
     newLine = await lineInstance.addShopperToLine(id, 
       {
         joinTime: new Date().getTime(),
-        number: number
+        number: number,
+        serviceTime: 0,
+        waitTime: 0,
       });
   } else {
     newLine =

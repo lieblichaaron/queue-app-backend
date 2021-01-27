@@ -58,13 +58,13 @@ module.exports = class Line {
         { $push: { line: shopper } },
         { returnOriginal: false }
       );
-      if (line.value.length === 1) {
-        await this.linesCollection.updateOne(
-          { _id: ObjectID(id) },
+      if (line.value.line.length === 1) {
+        const newLine = await this.linesCollection.findOneAndUpdate(
+          { _id: ObjectID(id), "line.waitTime" : 0 },
           { $set: { "line.$.serviceStartTime": new Date().getTime() } }
         );
       }
-      return line.value;
+      return newLine.value;
     } catch {
       return false;
     }
