@@ -4,7 +4,6 @@ const router = express.Router();
 const {
   addNewLine,
   getLineById,
-  getLinesByOwnerId,
   addShopperToLine,
   removeShopperFromLine,
   getLineByIdOnChange,
@@ -17,8 +16,6 @@ router.post("", addNewLine);
 router.get("/:id", getLineById);
 
 router.get("/watch/:id", getLineByIdOnChange);
-
-router.get("/owned-by/:id", getLinesByOwnerId);
 
 router.put("/add-shopper/:id", addShopperToLine);
 

@@ -5,6 +5,7 @@ const validate = require("../controllers/validator");
 module.exports = class LineOwner {
   constructor() {
     this.lineOwnersCollection = mongoUtil.getDb().collection("lineOwners");
+    this.linesCollection = mongoUtil.getDb().collection("lines");
   }
   addLineOwner = async (ownerData) => {
     try {
@@ -35,6 +36,21 @@ module.exports = class LineOwner {
       return err.stack;
     }
   };
+
+  getLinesByOwnerId = async (ownerId) => {
+    const lineIds = await this.lineOwnersCollection.findOne(
+      { _id: ObjectID(ownerId) },
+      { projection: { _id: 1, lines: 1 } }
+    );
+    if (!lineIds.lines) return [];
+    const lineObjectIds = lineIds.lines.map((id) => ObjectID(id));
+    const cursor = await this.linesCollection.find({
+      _id: { $in: lineObjectIds },
+    });
+    const lines = await cursor.toArray();
+    return lines;
+  };
+
   changeLineOwnerSettings = async (accountSettings, oldEmail) => {
     /**
      * @param {Object} accountSettings - Changes to user settings
@@ -58,24 +74,30 @@ module.exports = class LineOwner {
       updateDoc.$set.displayName = accountSettings.displayName;
 
     try {
-      const newUser = await this.lineOwnersCollection.findOneAndUpdate(filter, updateDoc, {returnOriginal: false});
+      const newUser = await this.lineOwnersCollection.findOneAndUpdate(
+        filter,
+        updateDoc,
+        { returnOriginal: false }
+      );
       return newUser.value;
     } catch (err) {
       return err.stack;
     }
   };
   changeLineOwnerPassword = async (email, password) => {
-
-      const filter = { email };
-      const updateDoc = {
-        $set: { password },
-      };
-      try {
-        const newUser = await this.lineOwnersCollection.findOneAndUpdate(filter, updateDoc, {returnOriginal: false});
-        return newUser.value
-      } catch (err) {
-        return err.stack;
-      }
-
+    const filter = { email };
+    const updateDoc = {
+      $set: { password },
+    };
+    try {
+      const newUser = await this.lineOwnersCollection.findOneAndUpdate(
+        filter,
+        updateDoc,
+        { returnOriginal: false }
+      );
+      return newUser.value;
+    } catch (err) {
+      return err.stack;
+    }
   };
 };
