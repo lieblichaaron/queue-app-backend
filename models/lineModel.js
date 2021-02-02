@@ -78,6 +78,8 @@ module.exports = class Line {
 
   serveNextCustomer = async (lineId) => {
     try {
+
+      // get prev customer's service time and wait time
       const line = await this.linesCollection.findOne({
         _id: ObjectID(lineId),
       });
@@ -89,6 +91,8 @@ module.exports = class Line {
       const waitTime =
         Math.ceil(servedCustomer.serviceStartTime - servedCustomer.joinTime) /
         60000;
+
+      // remove served customer from line and push their service and wait times
       const newLine = await this.linesCollection.findOneAndUpdate(
         { _id: ObjectID(lineId), "line.number": nextCustNumber },
         {
@@ -98,10 +102,14 @@ module.exports = class Line {
         },
         { returnOriginal: false }
       );
+
+      // set current customer's service start time
       await this.linesCollection.updateOne(
         { _id: ObjectID(lineId), "line.number": nextCustNumber },
-        { $set: { "line.$.serviceStart": new Date().getTime() } }
+        { $set: { "line.$.serviceStartTime": (new Date().getTime()) } }
       );
+
+      // calc new average service times and wait times
       const serviceTimes = newLine.value.serviceTimes;
       const waitTimes = newLine.value.waitTimes;
       const avgServiceTime = Math.floor(
@@ -110,6 +118,7 @@ module.exports = class Line {
       const avgWaitTime = Math.floor(
         waitTimes.reduce((a, b) => a + b, 0) / serviceTimes.length
       );
+
       return {
         avgServiceTime,
         avgWaitTime,
