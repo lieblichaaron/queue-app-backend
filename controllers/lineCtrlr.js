@@ -43,7 +43,7 @@ const addShopperToLine = async (req, res) => {
       lineId: line._id,
       number: number,
       serviceTime: 0,
-      serviceStart: 0,
+      serviceStartTime: null,
       waitTime: 0,
     });
   } else {
