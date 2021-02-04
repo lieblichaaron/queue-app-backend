@@ -96,6 +96,9 @@ module.exports = class Line {
       if (!line.line || line.line.length === 0) {
         const serviceTimes = line.serviceTimes;
         const waitTimes = line.waitTimes;
+        if (!serviceTimes) {
+          return {avgServiceTime: line.estServiceTime, avgWaitTime: 0}
+        }
         return this.calcAvgServiceAndWait(serviceTimes, waitTimes);
       }
 
